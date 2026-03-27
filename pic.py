@@ -1234,7 +1234,12 @@ def run_app_process(file1, file2):
     except Exception as e:
         return f"エラーが発生しました: {str(e)}", None, None
 
-def launch_gradio_app():
+def launch_gradio_app(
+    *,
+    inbrowser: bool = True,
+    server_name: str | None = None,
+    server_port: int | None = None,
+):
     import gradio as gr
 
     with gr.Blocks(title="人物サイズ比較ツール") as demo:
@@ -1271,7 +1276,11 @@ def launch_gradio_app():
             outputs=[status_text, output_main_file, output_debug_file]
         )
 
-    demo.launch(inbrowser=True)
+    demo.launch(
+        inbrowser=inbrowser,
+        server_name=server_name,
+        server_port=server_port,
+    )
 
 if __name__ == "__main__":
     print("====================================")

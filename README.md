@@ -21,13 +21,20 @@ python pic.py
 
 ## デプロイについて（重要）
 
-このプロジェクトは **Python + Gradio** です。Vercelは主に Next.js などのNode/静的サイト向けなので、
-GradioアプリをそのままVercelに載せるのは相性が悪い/制限に当たりやすいです。
+最短で公開するなら **Hugging Face Spaces（Gradio）** が簡単です。
 
-おすすめは以下です：
+### Hugging Face Spaces（最短手順）
 
-- Hugging Face Spaces（Gradioをそのまま公開しやすい）
-- Render / Railway / Fly.io / Cloud Run（Dockerで常駐プロセスとして動かす）
+1. Hugging Face にログイン
+2. New Space → SDK は **Gradio**
+3. 既存のGitHubリポジトリ（`Yoichiro8552/picture-ai`）を接続
+4. `app.py` がエントリーポイントになります（このリポジトリに追加済み）
 
-Vercelにどうしても載せたい場合は、構成変更（Next.jsフロント + API分離 等）が必要になります。
+補足：
+- Spaces は `PORT=7860` が使われることが多いので `app.py` 側で対応しています
+
+### Vercelについて
+
+このプロジェクトは **Python + Gradio**（常駐プロセス）なので、Vercel（主にNext.js/静的/Serverless前提）とは相性が悪いです。
+Vercelで公開したい場合は、Next.js化 + API分離などの構成変更が必要になります。
 
