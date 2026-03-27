@@ -1,0 +1,15 @@
+{
+	"folders": [
+		{
+			"path": "person_size_tool"
+		}
+	],
+	"launch": {
+		"version": "0.2.0",
+		"configurations": [
+			
+
+
+		]
+	}
+}
