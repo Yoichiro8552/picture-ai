@@ -383,6 +383,21 @@ def draw_person_info(image, info):
     bottom_y = info["bottom_y"]
     center_x = info["center_x"]
 
+    def clamp_x(x):
+        if x is None:
+            return None
+        # x は線の中心座標。枠外はクランプして「見える位置」に線を出す
+        return max(0, min(w - 1, int(round(x))))
+
+    def draw_blue_line(x):
+        x = clamp_x(x)
+        if x is None:
+            return
+        # 黒い縁
+        cv2.line(debug_img, (x, 0), (x, h - 1), (0, 0, 0), outer_thickness)
+        # 青い本線
+        cv2.line(debug_img, (x, 0), (x, h - 1), (255, 0, 0), inner_thickness)
+
     # ===== 上端ライン（緑）=====
     cv2.line(debug_img, (0, top_y), (w - 1, top_y), (0, 0, 0), outer_thickness)
     cv2.line(debug_img, (0, top_y), (w - 1, top_y), (0, 255, 0), inner_thickness)
@@ -392,9 +407,12 @@ def draw_person_info(image, info):
     cv2.line(debug_img, (0, bottom_y), (w - 1, bottom_y), (0, 0, 255), inner_thickness)
 
     # ===== 中心線（青）=====
-    cv2.line(debug_img, (center_x, 0), (center_x, h - 1), (0, 0, 0), outer_thickness)
-    cv2.line(debug_img, (center_x, 0), (center_x, h - 1), (255, 0, 0), inner_thickness)
+    draw_blue_line(center_x)
 
+    # ===== 胴体 左端/右端（青）=====
+    # info に left_x/right_x が渡された場合のみ追加で描画する
+    draw_blue_line(info.get("left_x"))
+    draw_blue_line(info.get("right_x"))
 
     return debug_img
 
@@ -650,14 +668,20 @@ def process_image_pair(input_path_1, input_path_2, output_path_1, output_path_2)
         "top_y": target_bottom_y - info1_seg["height"],
         "bottom_y": target_bottom_y,
         "center_x": target_center_x,
-        "height": info1_seg["height"]
+        "height": info1_seg["height"],
+        # out1 のキャンバス上での胴体左右端
+        "left_x": info1_seg["left_x"] + (target_center_x - info1_seg["center_x"]),
+        "right_x": info1_seg["right_x"] + (target_center_x - info1_seg["center_x"]),
     })
 
     placed_debug2 = draw_person_info(out2, {
         "top_y": target_bottom_y - info2_seg_scaled["height"],
         "bottom_y": target_bottom_y,
         "center_x": target_center_x,
-        "height": info2_seg_scaled["height"]
+        "height": info2_seg_scaled["height"],
+        # out2 のキャンバス上での胴体左右端
+        "left_x": info2_seg_scaled["left_x"] + (target_center_x - info2_seg_scaled["center_x"]),
+        "right_x": info2_seg_scaled["right_x"] + (target_center_x - info2_seg_scaled["center_x"]),
     })
 
     save_image("output/placed_debug_image1.jpg", placed_debug1)
@@ -744,14 +768,19 @@ def process_image_pair_combined(input_path_1, input_path_2, output_path, debug_o
         "top_y": target_bottom_y - info1_seg_scaled["height"],
         "bottom_y": target_bottom_y,
         "center_x": target_center_x,
-        "height": info1_seg_scaled["height"]
+        "height": info1_seg_scaled["height"],
+        # out1 のキャンバス上での胴体左右端（Segmentation の left/right を同じ配置ロジックで移す）
+        "left_x": info1_seg_scaled["left_x"] + (target_center_x - info1_seg_scaled["center_x"]),
+        "right_x": info1_seg_scaled["right_x"] + (target_center_x - info1_seg_scaled["center_x"]),
     })
 
     placed_debug2 = draw_person_info(out2, {
         "top_y": target_bottom_y - info2_seg_scaled["height"],
         "bottom_y": target_bottom_y,
         "center_x": target_center_x,
-        "height": info2_seg_scaled["height"]
+        "height": info2_seg_scaled["height"],
+        "left_x": info2_seg_scaled["left_x"] + (target_center_x - info2_seg_scaled["center_x"]),
+        "right_x": info2_seg_scaled["right_x"] + (target_center_x - info2_seg_scaled["center_x"]),
     })
 
     combined_debug_result = combine_images_side_by_side(
@@ -837,12 +866,24 @@ def process_video_pair(input_path_1, input_path_2, output_path_1, output_path_2)
     print(f"保存先: {output_path_2}")
 
 def make_debug_frame(frame, info, target_center_x, target_bottom_y):
-    return draw_person_info(frame, {
+    # ここで描画する座標は「place_person_on_canvas 後のキャンバス上」。
+    # そのため left_x/right_x は、place 時に使った shift_x で移して渡す。
+    shift_x = target_center_x - info["center_x"]
+    left_x = info.get("left_x")
+    right_x = info.get("right_x")
+
+    payload = {
         "top_y": target_bottom_y - info["height"],
         "bottom_y": target_bottom_y,
         "center_x": target_center_x,
-        "height": info["height"]
-    })
+        "height": info["height"],
+    }
+    if left_x is not None:
+        payload["left_x"] = left_x + shift_x
+    if right_x is not None:
+        payload["right_x"] = right_x + shift_x
+
+    return draw_person_info(frame, payload)
 
 def process_video_pair_combined(input_path_1, input_path_2, output_path, debug_output_path):
     print("動画比較処理を開始します...")
