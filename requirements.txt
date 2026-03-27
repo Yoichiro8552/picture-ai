@@ -1,5 +1,6 @@
-gradio
-mediapipe
-numpy
+gradio>=4.0,<6
+mediapipe==0.10.14
+numpy<2
 opencv-python-headless
+protobuf<5
 
