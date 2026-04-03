@@ -389,30 +389,30 @@ def draw_person_info(image, info):
         # x は線の中心座標。枠外はクランプして「見える位置」に線を出す
         return max(0, min(w - 1, int(round(x))))
 
-    def draw_blue_line(x):
+    def draw_vertical_guide(x, inner_bgr=(255, 0, 0)):
         x = clamp_x(x)
         if x is None:
             return
         # 黒い縁
         cv2.line(debug_img, (x, 0), (x, h - 1), (0, 0, 0), outer_thickness)
-        # 青い本線
-        cv2.line(debug_img, (x, 0), (x, h - 1), (255, 0, 0), inner_thickness)
+        # 色付き本線（BGR）
+        cv2.line(debug_img, (x, 0), (x, h - 1), inner_bgr, inner_thickness)
 
     # ===== 上端ライン（緑）=====
     cv2.line(debug_img, (0, top_y), (w - 1, top_y), (0, 0, 0), outer_thickness)
     cv2.line(debug_img, (0, top_y), (w - 1, top_y), (0, 255, 0), inner_thickness)
 
-    # ===== 下端ライン（赤）=====
+    # ===== 下端ライン（足元・緑）=====
     cv2.line(debug_img, (0, bottom_y), (w - 1, bottom_y), (0, 0, 0), outer_thickness)
-    cv2.line(debug_img, (0, bottom_y), (w - 1, bottom_y), (0, 0, 255), inner_thickness)
+    cv2.line(debug_img, (0, bottom_y), (w - 1, bottom_y), (0, 255, 0), inner_thickness)
 
-    # ===== 中心線（青）=====
-    draw_blue_line(center_x)
+    # ===== 中心線（赤）=====
+    draw_vertical_guide(center_x, (0, 0, 255))
 
     # ===== 胴体 左端/右端（青）=====
     # info に left_x/right_x が渡された場合のみ追加で描画する
-    draw_blue_line(info.get("left_x"))
-    draw_blue_line(info.get("right_x"))
+    draw_vertical_guide(info.get("left_x"))
+    draw_vertical_guide(info.get("right_x"))
 
     return debug_img
 
