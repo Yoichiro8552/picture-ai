@@ -1,4 +1,15 @@
-<<<<<<< HEAD
+---
+title: picture-ai
+emoji: 🖼
+colorFrom: blue
+colorTo: indigo
+sdk: gradio
+sdk_version: "6.10.0"
+python_version: "3.10"
+app_file: app.py
+pinned: false
+---
+
 # picture-ai
 
 人物サイズ比較ツール（Gradio）。
@@ -39,18 +50,3 @@ python pic.py
 このプロジェクトは **Python + Gradio**（常駐プロセス）なので、Vercel（主にNext.js/静的/Serverless前提）とは相性が悪いです。
 Vercelで公開したい場合は、Next.js化 + API分離などの構成変更が必要になります。
 
-=======
----
-title: Picture Ai
-emoji: 🐨
-colorFrom: red
-colorTo: green
-sdk: gradio
-sdk_version: 6.10.0
-app_file: app.py
-pinned: false
-license: mit
----
-
-Check out the configuration reference at https://huggingface.co/docs/hub/spaces-config-reference
->>>>>>> 1df68fb (initial commit)
